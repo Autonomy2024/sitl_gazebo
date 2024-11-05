@@ -323,6 +323,17 @@ void GimbalControllerPlugin::Load(physics::ModelPtr _model,
       gzwarn << "joint_pitch [" << pitchJointName << "] does not exist?\n";
     }
   }
+
+  // gimbal control port
+  if (this->sdf->HasElement("udp_gimbal_port_remote")) {
+    this->udp_gimbal_port_remote = _sdf->Get<int>("udp_gimbal_port_remote");
+  } else {
+    this->udp_gimbal_port_remote = 13030;
+    gzwarn << "Gimbal default param." << std::endl;
+  }
+  gzwarn << "[gazebo_gimbal_controller_plugin] Streaming gimbal mavlink stream to ip: " << this->udp_gimbal_host_ip  << " port: " << this->udp_gimbal_port_remote << std::endl;
+
+
   if (!this->pitchJoint)
   {
     gzerr << "GimbalControllerPlugin::Load ERROR! Can't get pitch joint '"
@@ -748,7 +759,8 @@ void GimbalControllerPlugin::SendMavlinkMessage(const mavlink_message_t &msg)
   sockaddr_in dest_addr {};
   dest_addr.sin_family = AF_INET;
   inet_pton(AF_INET, "127.0.0.1", &dest_addr.sin_addr.s_addr);
-  dest_addr.sin_port = htons(13030);
+  // dest_addr.sin_port = htons(13030);
+  dest_addr.sin_port = htons(this->udp_gimbal_port_remote);
 
   const ssize_t len = sendto(this->sock, buffer, packetlen, 0, reinterpret_cast<sockaddr *>(&dest_addr), sizeof(dest_addr));
   if (len <= 0) {
