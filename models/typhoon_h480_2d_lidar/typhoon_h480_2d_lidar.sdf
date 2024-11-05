@@ -1,5 +1,4 @@
-<!-- DO NOT EDIT: Generated from iris.sdf.jinja -->
-<sdf version='1.5'>
+<sdf version='1.6'>
   <model name='typhoon_h480'>
     <!-- Typhoon H body -->
     <pose>0 0 0.26 0 0 0.0</pose>
@@ -148,6 +147,53 @@
       <gravity>1</gravity>
       <velocity_decay/>
       <self_collide>0</self_collide>
+
+
+      <!-- lidar sensor -->
+      <sensor name="laser" type="ray">
+        <pose>0 0 0.2 0 -0 0</pose>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>640</samples>
+              <resolution>1</resolution>
+              <min_angle>-3.14</min_angle>
+              <max_angle>3.14</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.08</min>
+            <max>10</max>
+            <resolution>0.01</resolution>
+          </range>
+        </ray>
+        <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_laser.so">
+          <robotNamespace></robotNamespace>
+          <topicName>scan</topicName>
+          <frameName>laser_2d</frameName>
+        </plugin>
+        <always_on>1</always_on>
+        <update_rate>500</update_rate>
+        <visualize>true</visualize>
+      </sensor>
+
+    <include>
+      <uri>model://bumper_sensor_typhoon</uri>
+    </include>
+    <joint name="bumper_joint" type="revolute">
+      <child>bumper_sensor_typhoon::bumper_link</child>
+      <parent>base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint>
+
+
+
     </link>
 
     <link name="cgo3_mount_link">
@@ -244,8 +290,8 @@
       <axis>
         <xyz>0 0 1</xyz>
         <limit>
-          <lower>-1e+16</lower>
-          <upper>1e+16</upper>
+          <lower>-1e16</lower>
+          <upper>1e16</upper>
           <effort>100</effort>
           <velocity>-1</velocity>
         </limit>
@@ -400,22 +446,21 @@
         </camera>
         <always_on>1</always_on>
         <update_rate>10</update_rate>
-        <visualize>true</visualize>
-        <plugin name="GstCameraPlugin" filename="libgazebo_gst_camera_plugin.so">
-            <robotNamespace></robotNamespace>
-            <udpHost>127.0.0.1</udpHost>
-            <udpPort>{{ gst_udp_port }}</udpPort>
-        </plugin>
-        <plugin name="CameraManagerPlugin" filename="libgazebo_camera_manager_plugin.so">
-            <robotNamespace>typhoon_h480</robotNamespace>
-            <interval>1</interval>
-            <width>3840</width>
-            <height>2160</height>
-            <maximum_zoom>8.0</maximum_zoom>
-            <video_uri>{{ video_uri }}</video_uri>
-            <system_id>{{ mavlink_id }}</system_id>
-            <cam_component_id>{{ cam_component_id }}</cam_component_id>
-            <mavlink_cam_udp_port>{{ mavlink_cam_udp_port }}</mavlink_cam_udp_port>
+        <visualize>false</visualize>
+        <plugin name="cgo3_camera_controller" filename="libgazebo_ros_camera.so">
+          <robotNamespace></robotNamespace>
+          <alwaysOn>true</alwaysOn>
+          <updateRate>30</updateRate>
+          <cameraName>/cgo3_camera</cameraName>
+          <imageTopicName>image_raw</imageTopicName>
+          <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+          <frameName>cgo3_camera_optical_frame</frameName>
+          <hackBaseline>0.0</hackBaseline>
+          <distortionK1>0.0</distortionK1>
+          <distortionK2>0.0</distortionK2>
+          <distortionK3>0.0</distortionK3>
+          <distortionT1>0.0</distortionT1>
+          <distortionT2>0.0</distortionT2>
         </plugin>
       </sensor>
     </link>
@@ -426,8 +471,8 @@
       <axis>
         <xyz>0 -1 0</xyz>
         <limit>
-          <lower>-1.5708</lower>
-          <upper>0.7854</upper>
+          <lower>-1.05</lower>
+          <upper>2.09</upper>
           <effort>100</effort>
           <velocity>-1</velocity>
         </limit>
@@ -1145,17 +1190,6 @@
     </joint>
 
 
-    <include>
-      <uri>model://gps</uri>
-      <pose>0 0 0 0 0 0</pose>
-      <name>gps</name>
-    </include>
-    <joint name='gps_joint' type='fixed'>
-      <child>gps::link</child>
-      <parent>base_link</parent>
-    </joint>
-
-
     <plugin name='rosbag' filename='libgazebo_multirotor_base_plugin.so'>
       <robotNamespace></robotNamespace>
       <linkName>base_link</linkName>
@@ -1263,8 +1297,9 @@
       <motorSpeedPubTopic>/motor_speed/0</motorSpeedPubTopic>
       <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
     </plugin>
-    <plugin name='groundtruth_plugin' filename='libgazebo_groundtruth_plugin.so'>
-      <robotNamespace/>
+    <plugin name="gps_plugin" filename="libgazebo_gps_plugin.so">
+        <robotNamespace></robotNamespace>
+        <gpsNoise>true</gpsNoise>
     </plugin>
     <plugin name='magnetometer_plugin' filename='libgazebo_magnetometer_plugin.so'>
       <robotNamespace/>
@@ -1282,19 +1317,20 @@
     <plugin name='mavlink_interface' filename='libgazebo_mavlink_interface.so'>
       <robotNamespace></robotNamespace>
       <imuSubTopic>/imu</imuSubTopic>
+      <gpsSubTopic>/gps</gpsSubTopic>
       <magSubTopic>/mag</magSubTopic>
       <baroSubTopic>/baro</baroSubTopic>
       <mavlink_addr>INADDR_ANY</mavlink_addr>
-      <mavlink_tcp_port>{{ mavlink_tcp_port }}</mavlink_tcp_port>
-      <mavlink_udp_port>{{ mavlink_udp_port }}</mavlink_udp_port>
-      <serialEnabled>{{ serial_enabled }}</serialEnabled>
-      <serialDevice>{{ serial_device }}</serialDevice>
-      <baudRate>{{ serial_baudrate }}</baudRate>
+      <mavlink_udp_port>14560</mavlink_udp_port>
+      <mavlink_tcp_port>4560</mavlink_tcp_port>
+      <serialEnabled>false</serialEnabled>
+      <serialDevice>/dev/ttyACM0</serialDevice>
+      <baudRate>921600</baudRate>
       <qgc_addr>INADDR_ANY</qgc_addr>
       <qgc_udp_port>14550</qgc_udp_port>
       <sdk_addr>INADDR_ANY</sdk_addr>
       <sdk_udp_port>14540</sdk_udp_port>
-      <hil_mode>{{ hil_mode }}</hil_mode>
+      <hil_mode>false</hil_mode>
       <hil_state_level>false</hil_state_level>
       <enable_lockstep>true</enable_lockstep>
       <use_tcp>true</use_tcp>
@@ -1356,7 +1392,7 @@
           <zero_position_armed>0</zero_position_armed>
           <joint_control_type>position_gztopic</joint_control_type>
           <gztopic>/gimbal_roll_cmd</gztopic>
-          <joint_name>typhoon_h480::cgo3_camera_joint</joint_name>
+          <joint_name>cgo3_camera_joint</joint_name>
         </channel>
         <channel name="gimbal_pitch">
           <input_index>7</input_index>
@@ -1366,7 +1402,7 @@
           <zero_position_armed>0</zero_position_armed>
           <joint_control_type>position_gztopic</joint_control_type>
           <gztopic>/gimbal_pitch_cmd</gztopic>
-          <joint_name>typhoon_h480::cgo3_camera_joint</joint_name>
+          <joint_name>cgo3_camera_joint</joint_name>
         </channel>
         <channel name="gimbal_yaw">
           <input_index>8</input_index>
@@ -1376,7 +1412,7 @@
           <zero_position_armed>0</zero_position_armed>
           <joint_control_type>position_gztopic</joint_control_type>
           <gztopic>/gimbal_yaw_cmd</gztopic>
-          <joint_name>typhoon_h480::cgo3_vertical_arm_joint</joint_name>
+          <joint_name>cgo3_vertical_arm_joint</joint_name>
         </channel>
         <channel name="left_leg">
           <input_index>9</input_index>
@@ -1431,14 +1467,14 @@
       <accelerometerTurnOnBiasSigma>0.196</accelerometerTurnOnBiasSigma>
     </plugin>
     <plugin name='gimbal_controller' filename='libgazebo_gimbal_controller_plugin.so'>
-      <joint_yaw>typhoon_h480::cgo3_vertical_arm_joint</joint_yaw>
-      <joint_roll>typhoon_h480::cgo3_horizontal_arm_joint</joint_roll>
-      <joint_pitch>typhoon_h480::cgo3_camera_joint</joint_pitch>
+      <joint_yaw>cgo3_vertical_arm_joint</joint_yaw>
+      <joint_roll>cgo3_horizontal_arm_joint</joint_roll>
+      <joint_pitch>cgo3_camera_joint</joint_pitch>
       <control_gimbal_channels>
         <channel>
           <joint_control_pid>
-            <p>0.4</p>
-            <i>0.05</i>
+            <p>0.6</p>
+            <i>0.1</i>
             <d>0.02</d>
             <iMax>0</iMax>
             <iMin>0</iMin>
@@ -1461,9 +1497,9 @@
         </channel>
         <channel>
           <joint_control_pid>
-            <p>0.3</p>
+            <p>2.068</p>
             <i>0.01245</i>
-            <d>0.015</d>
+            <d>0.01</d>
             <iMax>0</iMax>
             <iMin>0</iMin>
             <cmdMax>0.3</cmdMax>
