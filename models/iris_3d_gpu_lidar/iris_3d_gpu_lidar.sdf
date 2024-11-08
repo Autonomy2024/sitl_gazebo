@@ -582,7 +582,7 @@
     <!-- For Velodyne Lidar Payload -->
     <include>
       <uri>model://3d_gpu_lidar</uri>
-      <pose>0 0 0.08 0 0 0</pose>
+      <pose>0 0 -0.02 0 1.57 0</pose>
     </include>
     <joint name="lidar_joint" type="fixed">
       <child>3d_lidar::link</child>
