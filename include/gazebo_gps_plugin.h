@@ -51,7 +51,7 @@
 
 namespace gazebo
 {
-static constexpr double kDefaultUpdateRate = 5.0;               // hz
+static constexpr double kDefaultUpdateRate = 50.0;               // hz
 static constexpr double kDefaultGpsXYRandomWalk = 2.0;          // (m/s) / sqrt(hz)
 static constexpr double kDefaultGpsZRandomWalk = 4.0;           // (m/s) / sqrt(hz)
 static constexpr double kDefaultGpsXYNoiseDensity = 2.0e-4;     // (m) / sqrt(hz)
