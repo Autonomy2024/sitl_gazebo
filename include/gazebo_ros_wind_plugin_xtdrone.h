@@ -35,7 +35,7 @@ class GazeboROSWindPluginXTDrone : public WorldPlugin {
    : WorldPlugin(),
    namespace_(""),
    wind_pub_topic_("world_wind"),
-   wind_ros_sub_topic_("wind_xtdrone"),
+   wind_ros_sub_topic_("wind_drone"),
    frame_id_("world"),
    pub_interval_(0.5),
    gazebo_node_(NULL) {}
