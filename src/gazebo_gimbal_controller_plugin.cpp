@@ -692,7 +692,11 @@ void GimbalControllerPlugin::SendGimbalDeviceAttitudeStatus()
     GIMBAL_DEVICE_FLAGS_PITCH_LOCK |
     (this->yawLock ? GIMBAL_DEVICE_FLAGS_YAW_LOCK : 0);
 
-  auto q = q_ENU_to_NED * this->cameraImuSensor->Orientation() * q_FLU_to_FRD.Inverse();
+  //auto q = q_ENU_to_NED * this->cameraImuSensor->Orientation() * q_FLU_to_FRD.Inverse();
+
+  auto q_flu = this->cameraImuSensor->Orientation();  // FLU 坐标系下的四元数
+  auto q_frd = q_FLU_to_FRD.Inverse() * q_flu;  // 先转换到 FRD 坐标系
+  auto q = q_ENU_to_NED * q_frd;  // 将 FRD 坐标系的四元数转换到 NED 坐标系
 
   if (!this->yawLock) {
     // In follow mode we need to transform the absolute camera orientation to an orientation
@@ -701,6 +705,11 @@ void GimbalControllerPlugin::SendGimbalDeviceAttitudeStatus()
     const auto e = q.Euler();
     q.Euler(e[0], e[1], e[2] - q_vehicle.Euler()[2]);
   }
+
+  //auto eulerAngles = q.Euler();
+  //float yawInNED = eulerAngles[2];
+  //float yawInDegrees = yawInNED * (180.0 / M_PI);
+  //std::cout << "Yaw in NED: " << yawInDegrees << " degrees" << std::endl;
 
   const float qArr[4] = {
     static_cast<float>(q.W()),
