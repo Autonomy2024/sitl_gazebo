@@ -706,10 +706,10 @@ void GimbalControllerPlugin::SendGimbalDeviceAttitudeStatus()
     q.Euler(e[0], e[1], e[2] - q_vehicle.Euler()[2]);
   }
 
-  //auto eulerAngles = q.Euler();
-  //float yawInNED = eulerAngles[2];
-  //float yawInDegrees = yawInNED * (180.0 / M_PI);
-  //std::cout << "Yaw in NED: " << yawInDegrees << " degrees" << std::endl;
+  // auto eulerAngles = q.Euler();
+  // float yawInNED = eulerAngles[2];
+  // float yawInDegrees = yawInNED * (180.0 / M_PI);
+  // std::cout << "Yaw in NED: " << yawInDegrees << " degrees" << std::endl;
 
   const float qArr[4] = {
     static_cast<float>(q.W()),

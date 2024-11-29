@@ -149,7 +149,7 @@ namespace gazebo
     private: const double heartbeatIntervalS {1.0};
     private: common::Time lastAttitudeStatusSentTime;
 
-    private: const double defaultAttitudeStatusIntervalS {0.1};
+    private: const double defaultAttitudeStatusIntervalS {0.01};
     private: double attitudeStatusIntervalS {defaultAttitudeStatusIntervalS};
     private: bool sendingAttitudeStatus {true};
 
